@@ -1,10 +1,10 @@
 require('dotenv').config();
 const app = require("./src/app");
-const pool = require('./src/db/db');
+const connectDB = require('./src/db/db');
 const PORT = process.env.PORT || 3000;
 
 // Code shuru, pehle database check karo:
-pool.getConnection()
+connectDB.getConnection()
     .then(() => {
         // Agar yaha tak aaya matlab connected!
         console.log("Database se connect ho gaya!");
