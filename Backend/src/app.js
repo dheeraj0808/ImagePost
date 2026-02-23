@@ -39,6 +39,14 @@ app.post('/create-post', upload.any(), async (req, res) => {
     }
 });
 
+app.get('/posts', async (req, res) => {
+    const post = await PostModel.getAllPosts();
+    return res.status(200).json({
+        message: "Posts fetched successfully!",
+        data: post
+    });
+});
+
 app.get('/', (req, res) => {
     res.send('Welcome to the ImagePost API!');
 });
