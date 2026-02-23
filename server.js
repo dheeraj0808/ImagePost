@@ -1,20 +1,22 @@
 require('dotenv').config();
 const app = require("./src/app");
 const connectDB = require('./src/db/db');
+const { createPostTable } = require('./src/Models/post.model');
 const PORT = process.env.PORT || 5000;
 
-// Code shuru, pehle database check karo:
+// Pehle DB connect karo, phir table banao, phir server start karo
 connectDB.getConnection()
-    .then(() => {
-        // Agar yaha tak aaya matlab connected!
+    .then(async () => {
         console.log("Database se connect ho gaya!");
 
-        // Ab hum apna node.js/express server start kar sakte hain
+        // Posts table banao (agar pehle se nahi hai toh)
+        await createPostTable();
+
+        // Server start karo
         app.listen(PORT, () => {
             console.log(`Server chal raha hai (Port ${PORT})`);
         });
     })
     .catch((err) => {
-        // Agar database nai chala to ye error aayega
         console.log("Database Error:", err);
     });

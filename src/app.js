@@ -1,6 +1,8 @@
 const express = require("express");
 const multer = require("multer");
 const uploadFile = require("./Models/Services/Storage.services");
+const PostModel = require("./Models/post.model");
+
 const app = express();
 
 app.use(express.json());

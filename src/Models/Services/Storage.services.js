@@ -1,17 +1,17 @@
 const ImageKit = require("imagekit");
 
-// ImageKit dashboard se apni keys lo aur yahan daalo
+// ImageKit ko 3 cheezein chahiye — publicKey, privateKey, urlEndpoint
 const imagekit = new ImageKit({
-    publicKey: "your_public_key",                          // Dashboard se public key daalo
-    privateKey: "private_boxPu0NhLOQE9fxtuaJmnbrHJw8=",
-    urlEndpoint: "https://ik.imagekit.io/your_imagekit_id" // Dashboard se URL endpoint daalo
+    publicKey: "public_dummy",
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint: "https://ik.imagekit.io/u6wtpdnun"
 });
 
+// Ye function image ko ImageKit pe upload karega
 async function uploadFile(buffer) {
-    console.log("Uploading file to ImageKit...");
     const result = await imagekit.upload({
         file: buffer.toString("base64"),
-        fileName: "post_image_" + Date.now()
+        fileName: "post_" + Date.now()
     });
     return result;
 }
