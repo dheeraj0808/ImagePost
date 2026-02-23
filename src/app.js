@@ -5,22 +5,38 @@ const app = express();
 
 app.use(express.json());
 
-const storage = multer.diskStorage({
-    storage: multer.memoryStorage()
+// Memory storage — file ka buffer milega (ImageKit ke liye zaroori hai)
+const upload = multer({ storage: multer.memoryStorage() });
 
+// upload.any() — koi bhi field name accept karega, debug ke liye best hai
+app.post('/create-post', upload.any(), async (req, res) => {
+    try {
+        console.log("Body:", req.body);
+        console.log("Files:", req.files);
+
+        // req.files array hoga upload.any() ke saath
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: "Image file is required!" });
+        }
+
+        // Pehli file ko upload karo
+        const file = req.files[0];
+        console.log("Field name received:", file.fieldname);
+
+        const result = await uploadFile(file.buffer);
+        console.log("Upload Result:", result);
+
+        res.status(201).json({
+            message: "Post created successfully!",
+            imageUrl: result.url,
+            data: result
+        });
+    } catch (err) {
+        console.error("Error:", err);
+        res.status(500).json({ error: "Something went wrong!", details: err.message });
+    }
 });
 
-app.post('/create-post', (req, res) => {
-
-    console.log(req.body);
-    console.log(req.file);
-
-    const result = uploadFile(req.file.buffer);
-
-    console.log(result);
-});
-
-// app.js mein add kiya gaya:
 app.get('/', (req, res) => {
     res.send('Welcome to the ImagePost API!');
 });

@@ -1,17 +1,31 @@
-const mysql = require('mysql2/promise');
+const connectDB = require('../db/db');
 
-const PostSchema = new mysql.Schema({
+// MySQL mein table banana padta hai (MongoDB jaisa Schema nahi hota)
+async function createPostTable() {
+    const query = `
+        CREATE TABLE IF NOT EXISTS posts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            image VARCHAR(500) NOT NULL,
+            caption VARCHAR(500) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `;
+    await connectDB.query(query);
+    console.log("Posts table ready!");
+}
 
-    image: {
-        type: String,
-        required: true
-    },
-    caption: {
-        type: String,
-        required: true
-    }
-});
+// Ek post insert karo
+async function createPost(image, caption) {
+    const query = `INSERT INTO posts (image, caption) VALUES (?, ?)`;
+    const [result] = await connectDB.query(query, [image, caption]);
+    return result;
+}
 
-const PostModel = mysql.model('Post', PostSchema);
+// Saare posts laao
+async function getAllPosts() {
+    const query = `SELECT * FROM posts ORDER BY created_at DESC`;
+    const [rows] = await connectDB.query(query);
+    return rows;
+}
 
-module.exports = PostModel;
+module.exports = { createPostTable, createPost, getAllPosts };
