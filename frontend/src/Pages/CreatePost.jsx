@@ -4,22 +4,62 @@ const CreatePost = () => {
     const [preview, setPreview] = useState(null)
     const [caption, setCaption] = useState('')
     const [fileName, setFileName] = useState('')
+    const [file, setFile] = useState(null)
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState('')
 
     // Image select karne pe preview dikhao
     const handleImageChange = (e) => {
-        const file = e.target.files[0]
-        if (file) {
-            setFileName(file.name)
+        const selectedFile = e.target.files[0]
+        if (selectedFile) {
+            setFile(selectedFile)
+            setFileName(selectedFile.name)
             const reader = new FileReader()
             reader.onloadend = () => setPreview(reader.result)
-            reader.readAsDataURL(file)
+            reader.readAsDataURL(selectedFile)
         }
     }
 
-    const handleSubmit = (e) => {
+    // Form submit — backend pe bhejo
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // Backend connection tum khud karoge — yahan sirf UI hai
-        alert('Post ready hai! Backend connect karke save hoga.')
+
+        if (!file) {
+            setMessage('❌ Please select an image!')
+            return
+        }
+
+        setLoading(true)
+        setMessage('')
+
+        // FormData banao — image + caption backend pe jayega
+        const formData = new FormData()
+        formData.append('image', file)
+        formData.append('caption', caption)
+
+        try {
+            const res = await fetch('http://localhost:5000/create-post', {
+                method: 'POST',
+                body: formData
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                setMessage('✅ Post created successfully!')
+                // Form reset karo
+                setPreview(null)
+                setCaption('')
+                setFileName('')
+                setFile(null)
+            } else {
+                setMessage('❌ ' + (data.error || 'Something went wrong'))
+            }
+        } catch (err) {
+            setMessage('❌ Server se connect nahi ho paya!')
+        }
+
+        setLoading(false)
     }
 
     return (
@@ -27,6 +67,8 @@ const CreatePost = () => {
             <div className="create-post-card">
                 <h1 className="page-title">Create Post</h1>
                 <p className="page-subtitle">Share your moment with the world</p>
+
+                {message && <p className="status-message">{message}</p>}
 
                 <form onSubmit={handleSubmit} className="create-post-form">
                     {/* Image Upload Area */}
@@ -63,8 +105,8 @@ const CreatePost = () => {
                     />
 
                     {/* Submit Button */}
-                    <button type="submit" className="submit-btn">
-                        🚀 Create Post
+                    <button type="submit" className="submit-btn" disabled={loading}>
+                        {loading ? '⏳ Uploading...' : '🚀 Create Post'}
                     </button>
                 </form>
             </div>

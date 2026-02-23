@@ -2,36 +2,36 @@ const express = require("express");
 const multer = require("multer");
 const uploadFile = require("./Models/Services/Storage.services");
 const PostModel = require("./Models/post.model");
+const cors = require("cors");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 // Memory storage — file ka buffer milega (ImageKit ke liye zaroori hai)
 const upload = multer({ storage: multer.memoryStorage() });
 
-// upload.any() — koi bhi field name accept karega, debug ke liye best hai
+// Post create karo — image upload + DB save
 app.post('/create-post', upload.any(), async (req, res) => {
     try {
-        console.log("Body:", req.body);
-        console.log("Files:", req.files);
-
-        // req.files array hoga upload.any() ke saath
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: "Image file is required!" });
         }
 
-        // Pehli file ko upload karo
+        // ImageKit pe upload karo
         const file = req.files[0];
-        console.log("Field name received:", file.fieldname);
-
         const result = await uploadFile(file.buffer);
-        console.log("Upload Result:", result);
+
+        // MySQL mein save karo
+        const caption = req.body.caption || "No caption";
+        const dbResult = await PostModel.createPost(result.url, caption);
 
         res.status(201).json({
             message: "Post created successfully!",
+            postId: dbResult.insertId,
             imageUrl: result.url,
-            data: result
+            caption: caption
         });
     } catch (err) {
         console.error("Error:", err);

@@ -1,27 +1,33 @@
 import React, { useState, useEffect } from 'react'
 
 const Feed = () => {
-    // Dummy posts — jab tum backend connect karoge tab real data aayega
-    const [posts, setPosts] = useState([
-        {
-            id: 1,
-            image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600',
-            caption: 'Beautiful mountain view 🏔️',
-            created_at: '2026-02-23'
-        },
-        {
-            id: 2,
-            image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600',
-            caption: 'Beach vibes 🏖️',
-            created_at: '2026-02-22'
-        },
-        {
-            id: 3,
-            image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600',
-            caption: 'Night sky ✨',
-            created_at: '2026-02-21'
+    const [posts, setPosts] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    // Page load hote hi backend se posts laao
+    useEffect(() => {
+        fetchPosts()
+    }, [])
+
+    const fetchPosts = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/posts')
+            const data = await res.json()
+            setPosts(data.data || [])
+        } catch (err) {
+            console.log('Backend se connect nahi ho paya:', err)
         }
-    ])
+        setLoading(false)
+    }
+
+    if (loading) {
+        return (
+            <section className="feed-section">
+                <h1 className="page-title">Feed</h1>
+                <p className="page-subtitle">Loading posts...</p>
+            </section>
+        )
+    }
 
     return (
         <section className="feed-section">
